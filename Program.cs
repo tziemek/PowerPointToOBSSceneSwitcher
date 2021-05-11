@@ -8,9 +8,10 @@ namespace PowerPointToOBSSceneSwitcher
 {
     class Program
     {
-        private static Application ppt = new Microsoft.Office.Interop.PowerPoint.Application();
+        private static readonly Application ppt = new Application();
         private static ObsLocal OBS;
-        static async Task Main(string[] args)
+
+        static async Task Main()
         {
             Console.Write("Connecting to PowerPoint...");
             ppt.SlideShowNextSlide += App_SlideShowNextSlide;
@@ -27,13 +28,13 @@ namespace PowerPointToOBSSceneSwitcher
         }
 
 
-        async static void App_SlideShowNextSlide(SlideShowWindow Wn)
+        static void App_SlideShowNextSlide(SlideShowWindow Wn)
         {
             if (Wn != null)
             {
                 Console.WriteLine($"Moved to Slide Number {Wn.View.Slide.SlideNumber}");
                 //Text starts at Index 2 ¯\_(ツ)_/¯
-                var note = String.Empty;
+                var note = string.Empty;
                 try { note = Wn.View.Slide.NotesPage.Shapes[2].TextFrame.TextRange.Text; }
                 catch { /*no notes*/ }
 
@@ -46,7 +47,7 @@ namespace PowerPointToOBSSceneSwitcher
                 {
                     if (line.StartsWith("OBS:"))
                     {
-                        line = line.Substring(4).Trim();
+                        line = line[4..].Trim();
 
                         if (!sceneHandled)
                         {
@@ -57,7 +58,7 @@ namespace PowerPointToOBSSceneSwitcher
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"  ERROR: {ex.Message.ToString()}");
+                                Console.WriteLine($"  ERROR: {ex.Message}");
                             }
                         }
                         else
@@ -68,7 +69,7 @@ namespace PowerPointToOBSSceneSwitcher
 
                     if (line.StartsWith("OBSDEF:"))
                     {
-                        OBS.DefaultScene = line.Substring(7).Trim();
+                        OBS.DefaultScene = line[7..].Trim();
                         Console.WriteLine($"  Setting the default OBS Scene to \"{OBS.DefaultScene}\"");
                     }
 
